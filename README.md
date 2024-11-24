@@ -54,7 +54,8 @@ Use the record_eeg.py script to collect EEG data for training the model.
 
 Place the Muse device on your head and ensure it’s streaming via BlueMuse.\
 Run the script to start recording (Make sure you cd into the training_data folder):\
-```python record_eeg.py```\
+```python record_eeg.py```
+
 The script will save the recorded EEG data as a .csv file in the current directory.\
 Repeat this process for different labels (e.g., left, right) to collect sufficient data for training.\
 Minimum recommended abount is about 6 times per direction (The more the better!!!)
@@ -66,7 +67,8 @@ Combine all the recorded .csv files into a single dataset using the combinedata.
 Place all .csv files into a folder.\
 Update the data_folder variable to match your folder path\
 Run the script:\
-```python combinedata.py```\
+```python combinedata.py```
+
 The script will create a combined dataset named combined_training_data.csv in the current directory.
 
 ## Step 7: Preprocess EEG Data
@@ -76,11 +78,12 @@ Preprocess the combined dataset using the preprocess_eeg.py script.
 Ensure the combined_training_data.csv file is in the correct directory.\
 Update the input_file and save_folder variables in preprocess_eeg.py\
 Run the script:\
-```python preprocess_eeg.py```\
+```python preprocess_eeg.py```
+
 The script will:\
 Filter the data using a bandpass filter (may need to adjust adjust lowcut, highcut, and fs in the future).\
 Normalize and segment the data.\
-Save processed files as eeg_segments.npy and eeg_labels.npy.\
+Save processed files as eeg_segments.npy and eeg_labels.npy
 
 ## Step 8: Train the Model
 
@@ -89,7 +92,8 @@ Train the EEG Transformer model using the train_eeg_transformer.py script.
 Ensure the .npy files (eeg_segments.npy and eeg_labels.npy) are in the specified folder.\
 Update the paths in the script if necessary\
 Run the script:\
-```python trainmodel.py```\
+```python trainmodel.py```
+
 The script will:\
 Train the model for 5 epochs (adjust epochs in the script if needed, the more the better!!).\
 Save the trained model as eeg_transformer_model.pth.
@@ -101,7 +105,8 @@ Control Tux Racer in real-time using the eeg_racing_game.py script.
 Connect your Muse headset and ensure it is streaming via BlueMuse.\
 Launch Tux Racer.\
 Update the paths in eeg_racing_game.py\
-```python predict_eeg.py```\
+```python predict_eeg.py```
+
 The script will:\
 Read real-time EEG data and normalize it.\
 Predict actions ("Left" or "Right") based on EEG signals.\
