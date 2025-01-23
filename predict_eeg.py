@@ -93,9 +93,9 @@ try:
                 print(f"Class Probabilities: {probabilities}")
                 
                 # Apply class weights
-                class_weights = torch.tensor([1.0, 1.7]).to(device)  # Example weights: higher weight for class 1
-                weighted_probabilities = probabilities * class_weights  # Scale probabilities by class weights
-                prediction = torch.argmax(weighted_probabilities, dim=1).item()  # Predict based on weighted probabilities
+                #class_weights = torch.tensor([1.0, 1.7]).to(device)  # Example weights: higher weight for class 1
+                #weighted_probabilities = probabilities * class_weights  # Scale probabilities by class weights
+                prediction = torch.argmax(probabilities, dim=1).item()  # Predict based on weighted probabilities
 
             # Log predictions for debugging
             print(f"Raw outputs: {outputs}")
