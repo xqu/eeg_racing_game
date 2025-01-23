@@ -87,8 +87,8 @@ def preprocess_combined_data(input_file, save_folder, lowcut=1, highcut=50, fs=2
 # Run the preprocessing script
 if __name__ == "__main__":
     # Define input and output paths
-    input_file = "C:/Users/nawwa/Documents/research/trainingdata/combined_training_data.csv"  # CHANGE THIS path to your input file
-    save_folder = "C:/Users/nawwa/Documents/research/preprocessed_data"  # CHANGE THIS path to your output folder
+    input_file = os.path.join("combined_training_data.csv") # CHANGE THIS path to your input file
+    save_folder = os.path.join("training_data\preprocessed") # CHANGE THIS path to your output folder
     
     # Preprocess EEG data
     preprocess_combined_data(input_file, save_folder)

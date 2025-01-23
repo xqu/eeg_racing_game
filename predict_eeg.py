@@ -1,13 +1,13 @@
 import numpy as np
-import torch
+import torch, os
 from pylsl import StreamInlet, resolve_stream  # For real-time EEG data streaming
-from eeg_racing_game.trainmodel import EEGTransformer  # Import the trained EEG Transformer model
+from trainmodel import EEGTransformer  # Import the trained EEG Transformer model
 from sklearn.model_selection import train_test_split  # For splitting training data
 from pynput.keyboard import Controller, Key  # For simulating keyboard button presses
 
 # Load preprocessed EEG data
-segments = np.load("C:/Users/nawwa/Documents/research/preprocessed_data/eeg_segments.npy")  # CHANGE THIS PATH
-labels = np.load("C:/Users/nawwa/Documents/research/preprocessed_data/eeg_labels.npy")  # CHANGE THIS PATH
+segments = np.load(os.path.join("training_data\preprocessed\eeg_segments.npy"))  # CHANGE THIS PATH
+labels = np.load(os.path.join("training_data\preprocessed\eeg_labels.npy"))
 
 # Split data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(segments, labels, test_size=0.2, random_state=42)
@@ -21,7 +21,7 @@ num_labels = 2  # Number of output classes (e.g., Left and Right)
 model = EEGTransformer(input_dim=input_dim, num_labels=num_labels)
 
 # Load pretrained model checkpoint
-checkpoint_path = "C:/Users/nawwa/Documents/research/eeg_transformer_model.pth"  # CHANGE THIS PATH
+checkpoint_path = os.path.join("eeg_racing_game_trained_model\eeg_transformer_model") # CHANGE THIS PATH
 checkpoint = torch.load(checkpoint_path, map_location=device)
 
 # Load and filter the model state dictionary to match current model architecture
@@ -90,7 +90,12 @@ try:
             with torch.no_grad():
                 outputs = model(data)  # Forward pass through the model
                 probabilities = torch.softmax(outputs, dim=1)  # Compute probabilities
-                prediction = torch.argmax(probabilities, dim=1).item()  # Get predicted class
+                print(f"Class Probabilities: {probabilities}")
+                
+                # Apply class weights
+                class_weights = torch.tensor([1.0, 1.7]).to(device)  # Example weights: higher weight for class 1
+                weighted_probabilities = probabilities * class_weights  # Scale probabilities by class weights
+                prediction = torch.argmax(weighted_probabilities, dim=1).item()  # Predict based on weighted probabilities
 
             # Log predictions for debugging
             print(f"Raw outputs: {outputs}")
@@ -100,14 +105,11 @@ try:
             # Simulate key presses based on prediction
             if prediction == 0:  # Class 0 corresponds to "Left"
                 action = "Left"
-                keyboard.press(Key.left)
-                keyboard.release(Key.left)
             else:  # Class 1 corresponds to "Right"
                 action = "Right"
-                keyboard.press(Key.right)
-                keyboard.release(Key.right)
 
             print(f"Predicted Action: {action}")
 
 except KeyboardInterrupt:
     print("Prediction stopped.")
+

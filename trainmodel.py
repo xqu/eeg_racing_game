@@ -4,7 +4,7 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import AutoModel, AutoConfig
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
-import time
+import time, os
 
 # Custom Dataset class for EEG data
 class EEGDataset(Dataset):
@@ -52,8 +52,8 @@ class EEGTransformer(nn.Module):
         return x
 
 # Load preprocessed data
-segments = np.load("C:/Users/nawwa/Documents/research/preprocessed_data/eeg_segments.npy")  # CHANGE THIS PATH
-labels = np.load("C:/Users/nawwa/Documents/research/preprocessed_data/eeg_labels.npy")  # CHANGE THIS PATH
+segments = np.load(os.path.join("training_data\preprocessed\eeg_segments.npy"))  # CHANGE THIS PATH
+labels = np.load(os.path.join("training_data\preprocessed\eeg_labels.npy"))  # CHANGE THIS PATH
 
 # Split data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(segments, labels, test_size=0.2, random_state=42)
@@ -111,6 +111,6 @@ if __name__ == "__main__":
         print(f"Epoch {epoch + 1} completed. Average Loss: {total_loss / len(train_loader)}")
 
     # Save the trained model
-    model_save_path = "C:/Users/nawwa/Documents/research/eeg_transformer_model.pth"  # CHANGE THIS PATH
+    model_save_path = os.path.join("eeg_transformer_model")  # CHANGE THIS PATH
     torch.save(model.state_dict(), model_save_path)
     print(f"Model saved to {model_save_path}")

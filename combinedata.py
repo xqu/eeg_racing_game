@@ -2,7 +2,7 @@ import pandas as pd
 import os
 
 # Path to the folder containing the training data
-data_folder = "C:/Users/nawwa/Documents/research/trainingdata"  # CHANGE THIS PATH AS NEEDED
+data_folder = os.path.join("training_data\data" ) # CHANGE THIS PATH AS NEEDED
 
 # Initialize an empty list to store dataframes
 dataframes = []
