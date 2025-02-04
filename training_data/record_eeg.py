@@ -1,6 +1,11 @@
 from muselsl import stream, record  # Muse LSL library for streaming and recording EEG data
 from datetime import datetime       # For generating timestamps
 import os                           # For file and folder handling
+import threading
+import argparse
+import matplotlib.pyplot as plt
+from pylsl import StreamInlet, resolve_stream
+import numpy as np
 
 # Function to start Muse streaming
 def start_stream():
@@ -11,6 +16,11 @@ def start_stream():
     If the Muse stream is already running, this function can be skipped.
     """
     try:
+        print("Checking for stream")
+        streams = resolve_stream('type', 'EEG')
+        if streams:
+            print("Muse stream already running. Skipping stream initilization")
+        print("Starting stream")
         stream()  # Start the Muse stream
     except Exception as e:
         print("Error starting the Muse stream:", e)
@@ -39,7 +49,9 @@ def record_eeg_data(duration, label):
     try:
         # Start recording EEG data
         print(f"Recording EEG data for {duration} seconds...")
-        record(duration=duration, filename=filename)  # Save the recording as a CSV
+        record_thread = threading.Thread(target=record, args=(duration, filename))
+        record_thread.start() #visualize data in the future?
+        record_thread.join() #wait for recording to finish
         print(f"Recording saved to {filename}")
     except Exception as e:
         print("Error recording EEG data:", e)
@@ -55,12 +67,19 @@ if __name__ == "__main__":
         3. Save the recording to a CSV file in the current working directory.
     """
 
+    parser = argparse.ArgumentParser(description="Record EEG data from Muse headset")
+    parser.add_argument("--duration", type=int, default=60, help="Duration of EEG recording (seconds).")
+    parser.add_argument("--label", type=str, required=True, help="Label for the EEG recording (left or right).")
+    args = parser.parse_args()
+    if not args.label.isalpha():
+        print("Error: Label must be in word form(eg. left, right).")
+        exit()
     # Step 1: Start Muse LSL stream (if Muse is not already streaming)
     start_stream()  # Run this only if the Muse device is not already streaming
 
     # Step 2: Specify recording duration and label
     duration = 60  # Duration in seconds (Adjustable: change to desired recording length)
-    label = input("Enter the label for this recording (e.g., left, right): ")
+    label = input("Enter the label for this recording (e.g., left, right): ") #ADD ERROR HANDLING
 
     # Step 3: Record EEG data
-    record_eeg_data(duration, label)
+    record_eeg_data(args.duration, args.label)

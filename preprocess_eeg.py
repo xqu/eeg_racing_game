@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from scipy.signal import butter, lfilter
 import os
+import multiprocessing
+from concurrent.futures import ThreadPoolExecutor
 
 # Bandpass filter function
 def bandpass_filter(data, lowcut, highcut, fs, order=4):
@@ -22,6 +24,23 @@ def bandpass_filter(data, lowcut, highcut, fs, order=4):
     b, a = butter(order, [low, high], btype='band')  # Create filter coefficients
     return lfilter(b, a, data)  # Apply the filter
 
+# Parallelized bandpass filter function
+def parallel_bandpass_filter(data, lowcut, highcut, fs, workers = 4):
+    """
+    Applies bandpass filter in parallel to all EEG channels.
+    Parameters:
+        data: 2D numpy array (time points x channels).
+        lowcut, highcut, fs: Filter parameters.
+        workers: Number of parallel processes.
+    Returns:
+        2D numpy array of filtered EEG signals.
+    """
+    with multiprocessing.Pool(processes=workers) as pool:
+        filtered_data = pool.starmap(
+            bandpass_filter, [(data[:, i], lowcut, highcut, fs) for i in range(data.shape[1])]
+        )
+    return np.column_stack(filtered_data)
+
 # Segment function
 def segment_data(data, labels, window_size, step_size):
     """
@@ -37,10 +56,18 @@ def segment_data(data, labels, window_size, step_size):
     """
     segments = []
     segment_labels = []
-    for i in range(0, len(data) - window_size, step_size):
-        window = data[i:i + window_size]  # Extract window
-        segments.append(window)
-        segment_labels.append(labels[i])  # Use label of the first time point in the window
+    
+    # Parallel segmentation using threadpoolexectuer
+    def process_segment(i):
+        return data[i : i + window_size], labels[i]
+    
+    with ThreadPoolExecutor() as executor:
+        results = executor.map(process_segment, range(0, len(data) - window_size, step_size))
+
+    #unpack
+    for segment, label in results:
+        segments.append(segment)
+        segment_labels.append(label)
     return np.array(segments), np.array(segment_labels)
 
 # Main preprocessing function
@@ -68,7 +95,7 @@ def preprocess_combined_data(input_file, save_folder, lowcut=1, highcut=50, fs=2
     
     # Apply bandpass filter to each channel
     print("Applying bandpass filter...")
-    filtered_data = np.apply_along_axis(bandpass_filter, axis=0, arr=data, lowcut=lowcut, highcut=highcut, fs=fs)
+    filtered_data = parallel_bandpass_filter(data, lowcut, highcut, fs, workers=multiprocessing.cpu_count())
     
     # Normalize each channel (z-score normalization)
     print("Normalizing data...")
@@ -87,8 +114,8 @@ def preprocess_combined_data(input_file, save_folder, lowcut=1, highcut=50, fs=2
 # Run the preprocessing script
 if __name__ == "__main__":
     # Define input and output paths
-    input_file = os.path.join("combined_training_data.csv") # CHANGE THIS path to your input file
-    save_folder = os.path.join("training_data\preprocessed") # CHANGE THIS path to your output folder
+    input_file = os.path.join("combined_training_data.csv")
+    save_folder = os.path.join("training_data", "preprocessed")
     
     # Preprocess EEG data
     preprocess_combined_data(input_file, save_folder)
