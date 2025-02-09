@@ -16,7 +16,7 @@ CALIBRATION_TIME = 5  # Collect baseline data for 5 seconds
 WINDOW_SIZE = 100  # Number of past samples to track for threshold updates
 
 # Collect baseline EEG data
-print("Calibrating... Please remain still and relaxed. Think neutral thoughts")
+print("Calibrating... Please remain still and relaxed. Think NEUTRAL thoughts (Think of nothing, look straight ahead)")
 baseline_values = []
 start_time = time.time()
 
